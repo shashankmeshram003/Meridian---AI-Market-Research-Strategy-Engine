@@ -258,7 +258,7 @@ Every protected route depends on `get_current_user` (`backend/core/auth.py`):
 
 ### Database Schema (Supabase / Postgres)
 
-Nine ordered migrations build the schema incrementally:
+Eight ordered migrations build the schema incrementally:
 
 | # | Migration | Table(s) created |
 |:---:|---|---|
