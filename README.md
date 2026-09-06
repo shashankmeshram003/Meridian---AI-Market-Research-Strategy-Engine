@@ -1,7 +1,7 @@
 <div align="center">
 
 # Meridian - AI Market Research & Strategy Engine 
-### View Application Link : https://meridian-frontend-fawn.vercel.app/
+### View Live Application Link : https://meridian-frontend-fawn.vercel.app/
 
 ### An autonomous multi-agent system that turns a research brief into a fully cited, consulting-grade market report
 
@@ -39,6 +39,8 @@
 - [Getting the Project Running Locally](#getting-the-project-running-locally)
 - [Security Notes](#security-notes)
 - [Project Status](#project-status)
+- [ScreenShots](#Screen-Shots)
+
 
 <br/>
 
@@ -497,3 +499,38 @@ The app will be live at `http://localhost:5173`.
 <img src="https://img.shields.io/badge/traceability-source--linked-0F6E56?style=for-the-badge&labelColor=1a1a1a" />
 
 </div>
+
+## ScreenShots
+
+### 1. Meridian Sign Up Page
+<img width="1920" height="876" alt="Meridian_Sign_Up" src="https://github.com/user-attachments/assets/fdb29a53-0905-4148-88ed-8c6cafb0357b" />
+
+### 2. Meridian Query Input
+<img width="1920" height="880" alt="Meridian_Query_Input" src="https://github.com/user-attachments/assets/f4888fed-184b-4cc6-beaa-1d8f6594cf00" />
+
+### 3.  Meridian Query Processing 
+<img width="1920" height="880" alt="Meridian_Query_running(75%)" src="https://github.com/user-attachments/assets/2536c9bc-8116-44ca-a2b9-f86f77a46bbb" />
+
+### 4.  Meridian Output Report
+<img width="1920" height="882" alt="Meridian_Output_Report" src="https://github.com/user-attachments/assets/51b8224c-2fbe-4dfc-9ffe-7286d39ecbaa" />
+
+
+## Contributors ⭐
+
+This project was developed collaboratively by:
+
+| Contributor | Role / Contribution |
+|---|---|
+| Shashank Meshram | Project Development |
+| Deepak Chauhan | Project Development |
+| Prajwal Girade | Project Development |
+| Aditya Tyagi | Project Development |
+| Vikram Kumar | Project Development |
+| Aryan Roy | Project Development |
+| Priyanshu Singh | Project Development |
+
+All contributors participated in the development, testing, documentation, and refinement of the project.
+
+
+
+
