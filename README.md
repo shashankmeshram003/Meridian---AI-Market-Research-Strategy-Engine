@@ -29,6 +29,8 @@
 ## Table of Contents
 
 - [What This Project Is](#what-this-project-is)
+- [Business Problem](#business-problem)
+- [Product Goal](#product-goal)
 - [Highlights](#highlights)
 - [System Architecture](#system-architecture)
 - [The Multi-Agent Research Pipeline](#the-multi-agent-research-pipeline)
@@ -38,8 +40,12 @@
 - [Tech Stack](#tech-stack)
 - [Getting the Project Running Locally](#getting-the-project-running-locally)
 - [Security Notes](#security-notes)
-- [Project Status](#project-status)
 - [ScreenShots](#Screen-Shots)
+- [Evaluation & Reliability](#evaluation--reliability)
+- [Known Limitations](#known-limitations)
+- [Performance Metrics](#performance-metrics)
+- [Future Improvements](#future-improvements)
+- [Project Status](#project-status)
 
 
 <br/>
@@ -58,6 +64,24 @@ This project is an AI-powered market research analyst. A signed-in user submits 
 | 6 | Attach every claim in the report back to its original citation |
 
 The result is served through a McKinsey-styled web dashboard, where the user watches the pipeline run in real time and then reads the final report through a **Report / Evidence / Sources** tabbed view — every key finding traceable back to a live web source.
+
+<br/>
+
+## Business Problem
+
+Market and competitive research is normally slow and manual: an analyst spends hours searching the web, reading sources, extracting claims, and cross-checking them before a single report can be written and that report is only as trustworthy as the diligence behind it. LLMs can write the report in seconds, but a report with no traceable sourcing isn't something a business can act on.
+
+Meridian exists to close that gap. The goal isn't just a faster report, but one where every claim is traceable back to a source, the way an analyst's would be.
+<br/>
+
+## Product Goal
+
+Meridian's goal is to make an AI-generated market report something a decision-maker can actually rely on. Concretely, that means:
+
+- **Automate the research grunt work** — planning, searching, extracting, and cross-checking evidence without automating away the trust that comes from citations.
+- **Keep every finding traceable** — a user can click from any key finding in the report down to the exact evidence and source that backs it.
+- **Make the wait transparent** — instead of a spinner, the user watches which of the seven pipeline stages is currently running.
+- **Ship it as a real product**, not a notebook demo — real authentication, per-user data isolation, and a deployed frontend and backend.
 
 <br/>
 
@@ -486,19 +510,6 @@ The app will be live at `http://localhost:5173`.
 
 <br/>
 
-## Project Status
-
-<div align="center">
-
-**This repository represents the final, deployed state of the Meridian AI Market Research & Strategy Engine**, a working, end-to-end multi-agent research application spanning authentication, a seven-stage AI pipeline, full evidence traceability, and a polished consulting-styled UI.
-
-<br/>
-
-<img src="https://img.shields.io/badge/pipeline-7%20agents-534AB7?style=for-the-badge&labelColor=1a1a1a" />
-<img src="https://img.shields.io/badge/auth-Supabase%20JWT-3ecf8e?style=for-the-badge&labelColor=1a1a1a" />
-<img src="https://img.shields.io/badge/traceability-source--linked-0F6E56?style=for-the-badge&labelColor=1a1a1a" />
-
-</div>
 
 ## ScreenShots
 
@@ -513,6 +524,55 @@ The app will be live at `http://localhost:5173`.
 
 ### 4.  Meridian Output Report
 <img width="1920" height="882" alt="Meridian_Output_Report" src="https://github.com/user-attachments/assets/51b8224c-2fbe-4dfc-9ffe-7286d39ecbaa" />
+
+## Evaluation & Reliability
+
+Reliability is built into the pipeline itself rather than checked afterward:
+
+| Mechanism | How it works |
+|---|---|
+| **Dedicated validation stage** | Before anything reaches the report, the Validation agent (`ai/validation/validation_agent.py`) cross-checks every extracted piece of evidence against its source and assigns it a confidence verdict. The evidence isn't trusted just because it was extracted. |
+| **Citation-backed findings** | The Report Linker (`ai/report/report_linker.py`) rewrites the report so every key finding links back to the exact evidence and source behind it. This is what powers the Report / Evidence / Sources tabs, and it means a finding with no traceable source can't silently make it into the final report. |
+| **Fail-fast on weak results** | If a stage comes back empty even after its retries (no tasks, no sources, no evidence), the pipeline stops and marks the job `failed` instead of letting a thin or unsupported report through. |
+| **Server-verified auth on every request** | Every bearer token is independently re-verified against Supabase on each call, so job ownership and access checks can't be spoofed client-side. |
+
+> Today this reliability is structural, enforced by the pipeline's own stages, rather than measured by a separate offline eval suite. Adding automated report-level scoring (citation coverage, hallucination spot-checks) is tracked under [Future Improvements](#future-improvements).
+
+<br/>
+
+## Known Limitations
+
+| Limitation | Detail |
+|---|---|
+| **Synchronous pipeline** | `POST /api/research/` runs all seven stages inline and only responds once the job is complete. There's no streaming or webhook callback, so the frontend's live progress view is a client-side animation timed to the expected stages rather than a true server-pushed status feed. |
+| **Single LLM provider** | The Planner, Extraction, Validation, and Report agents all depend on Gemini with no fallback provider. A Gemini outage stalls every new research job. |
+| **Semantic recall unused** | The `pgvector`-backed `memory_records` table exists in the schema but isn't yet read from or written to by the pipeline. There's no cross-job memory or recall today. |
+
+<br/>
+
+## Performance Metrics
+
+End-to-end run time depends on the seven-stage pipeline's calls to Gemini and Tavily, so it varies with upstream API load rather than being fixed:
+
+| Scenario | Runtime |
+|---|:---:|
+| Best Case | 45secs – 55secs |
+| Typical Case | 1min – 1min 30secs |
+| Worst Case (heavy Gemini traffic) | 1min 30secs – 2min 30secs |
+
+<br/>
+
+## Future Improvements
+
+| Idea | Why it'd help |
+|---|---|
+| **Streamed pipeline status** | Replace the client-timed progress animation with real server-pushed stage updates (WebSocket or SSE), so the UI reflects what the backend is actually doing at that moment. |
+| **Multi-provider LLM fallback** | Fall back to a second LLM provider if Gemini is unavailable or rate-limited, instead of stalling new jobs. |
+| **Activate semantic memory** | Start writing to `memory_records` so related past research (e.g. a previously researched market) can inform a new brief instead of starting from zero each time. |
+| **Exportable reports** | Let a user download a completed report as PDF or share a read-only link, rather than only viewing it in-app. |
+| **Automated report evaluation** | A lightweight eval pass (e.g. citation-coverage checks, hallucination spot-checks) run against every generated report before it's marked complete. |
+
+<br/>
 
 
 ## Contributors ⭐
@@ -531,6 +591,19 @@ This project was developed collaboratively by:
 
 All contributors participated in the development, testing, documentation, and refinement of the project.
 
+## Project Status
+
+<div align="center">
+
+**This repository represents the final, deployed state of the Meridian AI Market Research & Strategy Engine**, a working, end-to-end multi-agent research application spanning authentication, a seven-stage AI pipeline, full evidence traceability, and a polished consulting-styled UI.
+
+<br/>
+
+<img src="https://img.shields.io/badge/pipeline-7%20agents-534AB7?style=for-the-badge&labelColor=1a1a1a" />
+<img src="https://img.shields.io/badge/auth-Supabase%20JWT-3ecf8e?style=for-the-badge&labelColor=1a1a1a" />
+<img src="https://img.shields.io/badge/traceability-source--linked-0F6E56?style=for-the-badge&labelColor=1a1a1a" />
+
+</div>
 
 
 
