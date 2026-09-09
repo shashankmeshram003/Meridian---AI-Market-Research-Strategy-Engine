@@ -1,10 +1,3 @@
-<div align="center">
-
-<p align="center">
-  <img src="frontend/public/Meridian Logo.png" alt="Meridian Logo" width="100">
-</p>
-
-<div align="center">
 
 # Meridian - AI Market Research & Strategy Engine 
 ### View Live Application Link : https://meridian-frontend-fawn.vercel.app/
